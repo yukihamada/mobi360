@@ -4,6 +4,7 @@ export class VoiceHandler {
   constructor(env) {
     this.twilio = new Twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
     this.phoneNumber = env.TWILIO_PHONE_NUMBER;
+    this.env = env;
   }
 
   /**
@@ -13,12 +14,13 @@ export class VoiceHandler {
    */
   async initiateCall(customerPhone, dispatchId) {
     try {
+      const baseUrl = this.env?.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
       const call = await this.twilio.calls.create({
-        url: `https://api.mobi360.app/v1/ai-voice-dispatch/twiml/${dispatchId}`,
+        url: `${baseUrl}/api/v1/ai-voice-dispatch/twiml/${dispatchId}`,
         to: customerPhone,
         from: this.phoneNumber,
         method: 'POST',
-        statusCallback: `https://api.mobi360.app/v1/ai-voice-dispatch/status/${dispatchId}`,
+        statusCallback: `${baseUrl}/api/v1/ai-voice-dispatch/status/${dispatchId}`,
         statusCallbackMethod: 'POST',
         statusCallbackEvent: ['initiated', 'answered', 'completed']
       });
@@ -58,11 +60,12 @@ export class VoiceHandler {
       お送り先は${dispatchData.destination}でよろしいでしょうか？
       はいかいいえでお答えください。`);
       
+      const baseUrl = this.env?.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
       twiml.gather({
         input: 'speech',
         speechTimeout: 3,
         language: 'ja-JP',
-        action: `/api/v1/ai-voice-dispatch/process/${dispatchData.id}`,
+        action: `${baseUrl}/api/v1/ai-voice-dispatch/process/${dispatchData.id}`,
         method: 'POST'
       });
     } else {
@@ -80,8 +83,9 @@ export class VoiceHandler {
         お気をつけてお出かけください。`);
         
         // 配車確定の処理をキューに追加
+        const baseUrl = this.env?.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
         twiml.enqueue({
-          action: `/api/v1/ai-voice-dispatch/confirm/${dispatchData.id}`,
+          action: `${baseUrl}/api/v1/ai-voice-dispatch/confirm/${dispatchData.id}`,
           method: 'POST'
         });
       } else {
@@ -92,8 +96,9 @@ export class VoiceHandler {
         カスタマーサービスにお繋ぎいたします。`);
         
         // 人間のオペレーターに転送
+        const baseUrl = this.env?.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
         twiml.dial({
-          action: `/api/v1/ai-voice-dispatch/transfer/${dispatchData.id}`,
+          action: `${baseUrl}/api/v1/ai-voice-dispatch/transfer/${dispatchData.id}`,
           method: 'POST'
         }, '+81-3-1234-5678'); // オペレーター番号
       }

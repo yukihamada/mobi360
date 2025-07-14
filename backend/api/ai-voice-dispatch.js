@@ -44,7 +44,7 @@ app.post('/create', async (c) => {
     };
 
     // D1データベースに保存
-    await c.env.D1_MOBI360_DB.prepare(`
+    await c.env.DB.prepare(`
       INSERT INTO dispatch_requests (
         id, customer_name, customer_phone, pickup_location, destination,
         vehicle_type, status, created_at, estimated_arrival, vehicle_number, driver_name
@@ -68,7 +68,7 @@ app.post('/create', async (c) => {
 
     if (callResult.success) {
       // 通話開始成功
-      await c.env.D1_MOBI360_DB.prepare(`
+      await c.env.DB.prepare(`
         UPDATE dispatch_requests 
         SET call_sid = ?, status = 'calling' 
         WHERE id = ?
@@ -108,7 +108,7 @@ app.post('/twiml/:dispatchId', async (c) => {
     const dispatchId = c.req.param('dispatchId');
     
     // 配車データを取得
-    const dispatch = await c.env.D1_MOBI360_DB.prepare(`
+    const dispatch = await c.env.DB.prepare(`
       SELECT * FROM dispatch_requests WHERE id = ?
     `).bind(dispatchId).first();
 
@@ -118,7 +118,8 @@ app.post('/twiml/:dispatchId', async (c) => {
       });
     }
 
-    const twiml = generateTwiMLResponse(dispatch);
+    const baseUrl = c.env.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
+    const twiml = generateTwiMLResponse(dispatch, null, baseUrl);
 
     return c.text(twiml, 200, {
       'Content-Type': 'application/xml'
@@ -141,7 +142,7 @@ app.post('/process/:dispatchId', async (c) => {
     const voiceInput = voiceInputSchema.parse(body);
 
     // 配車データを取得
-    const dispatch = await c.env.D1_MOBI360_DB.prepare(`
+    const dispatch = await c.env.DB.prepare(`
       SELECT * FROM dispatch_requests WHERE id = ?
     `).bind(dispatchId).first();
 
@@ -151,10 +152,11 @@ app.post('/process/:dispatchId', async (c) => {
       });
     }
 
-    const twiml = generateTwiMLResponse(dispatch, voiceInput.SpeechResult);
+    const baseUrl = c.env.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
+    const twiml = generateTwiMLResponse(dispatch, voiceInput.SpeechResult, baseUrl);
 
     // 音声入力をログに記録
-    await c.env.D1_MOBI360_DB.prepare(`
+    await c.env.DB.prepare(`
       INSERT INTO voice_interactions (
         dispatch_id, speech_result, confidence, call_sid, created_at
       ) VALUES (?, ?, ?, ?, ?)
@@ -185,7 +187,7 @@ app.post('/confirm/:dispatchId', async (c) => {
     const dispatchId = c.req.param('dispatchId');
     
     // 配車を確定状態に更新
-    await c.env.D1_MOBI360_DB.prepare(`
+    await c.env.DB.prepare(`
       UPDATE dispatch_requests 
       SET status = 'confirmed', confirmed_at = ? 
       WHERE id = ?
@@ -230,7 +232,7 @@ app.post('/status/:dispatchId', async (c) => {
     );
 
     // 通話ステータスをデータベースに更新
-    await c.env.D1_MOBI360_DB.prepare(`
+    await c.env.DB.prepare(`
       UPDATE dispatch_requests 
       SET call_status = ?, call_updated_at = ? 
       WHERE id = ?
@@ -303,6 +305,7 @@ async function initiateVoiceCall(phoneNumber, dispatchId, env) {
 
     // Twilio API呼び出し（HTTP API直接）
     const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
+    const baseUrl = env.API_BASE_URL || 'https://mobility-ops-360-api.yukihamada.workers.dev';
     const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Calls.json`, {
       method: 'POST',
       headers: {
@@ -312,9 +315,9 @@ async function initiateVoiceCall(phoneNumber, dispatchId, env) {
       body: new URLSearchParams({
         To: phoneNumber,
         From: twilioPhoneNumber,
-        Url: `${env.API_BASE_URL}/api/v1/ai-voice-dispatch/twiml/${dispatchId}`,
+        Url: `${baseUrl}/api/v1/ai-voice-dispatch/twiml/${dispatchId}`,
         Method: 'POST',
-        StatusCallback: `${env.API_BASE_URL}/api/v1/ai-voice-dispatch/status/${dispatchId}`,
+        StatusCallback: `${baseUrl}/api/v1/ai-voice-dispatch/status/${dispatchId}`,
         StatusCallbackMethod: 'POST'
       })
     });
@@ -339,7 +342,7 @@ async function initiateVoiceCall(phoneNumber, dispatchId, env) {
 }
 
 // TwiMLレスポンスを生成
-function generateTwiMLResponse(dispatch, speechResult = null) {
+function generateTwiMLResponse(dispatch, speechResult = null, baseUrl = 'https://mobility-ops-360-api.yukihamada.workers.dev') {
   const message = speechResult ? 
     processVoiceInput(speechResult, dispatch) : 
     generateInitialMessage(dispatch);
@@ -347,7 +350,7 @@ function generateTwiMLResponse(dispatch, speechResult = null) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Say voice="Polly.Mizuki" language="ja-JP">${message}</Say>
-    <Gather input="speech" speechTimeout="auto" language="ja-JP" action="/api/v1/ai-voice-dispatch/process/${dispatch.id}">
+    <Gather input="speech" speechTimeout="auto" language="ja-JP" action="${baseUrl}/api/v1/ai-voice-dispatch/process/${dispatch.id}">
         <Say voice="Polly.Mizuki" language="ja-JP">お返事をお聞かせください。</Say>
     </Gather>
     <Say voice="Polly.Mizuki" language="ja-JP">お返事が聞こえませんでした。失礼いたします。</Say>

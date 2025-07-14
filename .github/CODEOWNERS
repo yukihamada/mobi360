@@ -1,0 +1,55 @@
+# Code Owners for Mobility Ops 360
+# These owners will be the default owners for everything in the repo
+# Unless a later match takes precedence, they will be requested for review when someone opens a pull request
+
+# Global owners
+* @yukihamada
+
+# Backend
+/backend/ @yukihamada
+/backend/src/api/ @yukihamada
+/backend/src/services/ @yukihamada
+/backend/tests/ @yukihamada
+
+# SDK
+/sdk/ @yukihamada
+/sdk/src/ @yukihamada
+/sdk/docs/ @yukihamada
+
+# Mobile app
+/mobile/ @yukihamada
+/mobile/lib/ @yukihamada
+/mobile/test/ @yukihamada
+
+# Infrastructure
+/infrastructure/ @yukihamada
+/.github/ @yukihamada
+/scripts/ @yukihamada
+
+# Documentation
+/docs/ @yukihamada
+*.md @yukihamada
+README.md @yukihamada
+CHANGELOG.md @yukihamada
+
+# Security
+SECURITY.md @yukihamada
+/backend/src/auth/ @yukihamada
+/backend/src/middleware/ @yukihamada
+
+# Dependencies
+package.json @yukihamada
+package-lock.json @yukihamada
+pubspec.yaml @yukihamada
+requirements.txt @yukihamada
+
+# Configuration files
+*.yml @yukihamada
+*.yaml @yukihamada
+*.json @yukihamada
+.env* @yukihamada
+
+# CI/CD
+.github/workflows/ @yukihamada
+Dockerfile @yukihamada
+docker-compose.yml @yukihamada

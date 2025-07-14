@@ -28,7 +28,7 @@ Twilioコンソールから以下を取得：
 # Twilioの認証情報
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_PHONE_NUMBER=+12407927324  # 購入した電話番号
+TWILIO_PHONE_NUMBER=+19592105018  # AI音声配車デモ番号（米国）
 
 # API設定
 API_BASE_URL=https://your-project.workers.dev
