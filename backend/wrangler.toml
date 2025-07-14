@@ -1,0 +1,75 @@
+name = "mobi360-api"
+main = "src/index.js"
+compatibility_date = "2024-01-15"
+
+# Default database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "mobi360-db"
+database_id = "1655deef-ff45-42bb-bd1d-b48e012b79d1"
+
+# プロダクション環境設定
+[env.production]
+name = "mobility-ops-360-api"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+API_BASE_URL = "https://api.mobility360.jp"
+
+# ステージング環境設定  
+[env.staging]
+name = "mobility-ops-360-api-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+API_BASE_URL = "https://staging-api.mobility360.jp"
+
+# 開発環境設定
+[env.development.vars]
+ENVIRONMENT = "development"
+API_BASE_URL = "http://localhost:56523"
+
+# D1 Database
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "mobi360-production-db"
+database_id = "3460a8b6-1644-4819-a53d-d1bf56fa990a"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "mobi360-development-db"
+database_id = "9a2784ee-047d-4279-851a-09da3058ccaa"
+
+# KV Storage for sessions (commented out for initial setup)
+# [[env.production.kv_namespaces]]
+# binding = "SESSIONS"
+# id = "YOUR_PRODUCTION_KV_ID"
+
+# [[env.development.kv_namespaces]]
+# binding = "SESSIONS"
+# id = "YOUR_DEVELOPMENT_KV_ID"
+
+# Queue for dispatch processing (commented out for initial setup)
+# [[env.production.queues]]
+# binding = "DISPATCH_JOBS"  
+# queue = "mobi360-dispatch-production"
+
+# [[env.development.queues]]
+# binding = "DISPATCH_JOBS"
+# queue = "mobi360-dispatch-development"
+
+# Durable Objects for real-time state (commented out for initial setup)
+# [[env.production.durable_objects.bindings]]
+# name = "DRIVER_STATE"
+# class_name = "DriverState"
+
+# [[env.development.durable_objects.bindings]]
+# name = "DRIVER_STATE"
+# class_name = "DriverState"
+
+# Environment secrets (set via wrangler secret put)
+# TWILIO_ACCOUNT_SID
+# TWILIO_AUTH_TOKEN
+# TWILIO_PHONE_NUMBER
+# JWT_SECRET
+# DATABASE_ENCRYPTION_KEY

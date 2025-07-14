@@ -1,0 +1,206 @@
+# Mobility Ops 360 - Docker Compose開発環境
+# CLAUDE.md準拠の完全自動化開発環境
+
+version: '3.8'
+
+services:
+  # PostgreSQL データベース（Supabase準拠）
+  postgres:
+    image: postgres:16-alpine
+    container_name: mobility-postgres
+    environment:
+      POSTGRES_DB: mobility_ops_360
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis（セッション・キャッシュ）
+  redis:
+    image: redis:7-alpine
+    container_name: mobility-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API（開発用）
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: mobility-backend
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/mobility_ops_360
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=development-jwt-secret
+      - PORT=3000
+    ports:
+      - "56523:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+
+  # Flutter Web開発サーバー
+  frontend:
+    build:
+      context: ./frontend/mobi360_app
+      dockerfile: Dockerfile.dev
+    container_name: mobility-frontend
+    environment:
+      - FLUTTER_WEB_PORT=8080
+      - API_BASE_URL=http://localhost:56523
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend/mobi360_app:/app
+      - flutter_cache:/root/.flutter
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/mobi360_app
+          target: /app
+          ignore:
+            - build/
+            - .dart_tool/
+
+  # Prometheus監視
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mobility-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  # Grafana ダッシュボード
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mobility-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+
+  # Loki ログ集約
+  loki:
+    image: grafana/loki:latest
+    container_name: mobility-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Traefik リバースプロキシ
+  traefik:
+    image: traefik:v3.0
+    container_name: mobility-traefik
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@mobility360.jp"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8081:8080"  # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  # MinIO (S3互換ストレージ)
+  minio:
+    image: minio/minio:latest
+    container_name: mobility-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Jaeger 分散トレーシング
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: mobility-jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  traefik_data:
+  minio_data:
+  flutter_cache:
+
+networks:
+  default:
+    name: mobility-ops-360

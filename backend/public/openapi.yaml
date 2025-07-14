@@ -1,0 +1,616 @@
+openapi: 3.0.3
+info:
+  title: Mobility Ops 360 API
+  description: |
+    タクシー業界向けAI配車システムAPI
+    
+    ## 主な機能
+    - 🎙️ AI音声配車（Twilio統合）
+    - 🚗 リアルタイムドライバーマッチング
+    - 📍 位置情報トラッキング
+    - 💰 動的料金計算
+    - 🔐 セキュア認証
+  version: 1.0.0
+  contact:
+    name: Mobility Ops 360 Support
+    email: support@mobility360.jp
+    url: https://mobility360.jp
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.mobility360.jp
+    description: Production server
+  - url: https://mobi360-api.yukihamada.workers.dev
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Health
+    description: ヘルスチェック
+  - name: Auth
+    description: 認証・登録
+  - name: Voice Dispatch
+    description: AI音声配車
+  - name: Realtime
+    description: リアルタイム配車
+  - name: Drivers
+    description: ドライバー管理
+  - name: Dashboard
+    description: ダッシュボード
+  - name: Twilio
+    description: Twilio管理
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: ヘルスチェック
+      description: システムの稼働状況を確認
+      security: []
+      responses:
+        '200':
+          description: システム正常稼働
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/register/company:
+    post:
+      tags:
+        - Auth
+      summary: タクシー会社登録
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyRegistration'
+      responses:
+        '201':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/register/driver:
+    post:
+      tags:
+        - Auth
+      summary: ドライバー登録
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriverRegistration'
+      responses:
+        '201':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: ログイン
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/verify:
+    get:
+      tags:
+        - Auth
+      summary: トークン検証
+      responses:
+        '200':
+          description: トークン有効
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/voice-dispatch/create:
+    post:
+      tags:
+        - Voice Dispatch
+      summary: AI音声配車リクエスト作成
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceDispatchRequest'
+      responses:
+        '201':
+          description: 配車リクエスト作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceDispatchResponse'
+
+  /api/voice-dispatch/twiml/{dispatchId}:
+    post:
+      tags:
+        - Voice Dispatch
+      summary: TwiML音声応答生成
+      security: []
+      parameters:
+        - name: dispatchId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: TwiML生成成功
+          content:
+            application/xml:
+              schema:
+                type: string
+
+  /api/realtime-dispatch:
+    post:
+      tags:
+        - Realtime
+      summary: リアルタイム配車
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeDispatchRequest'
+      responses:
+        '200':
+          description: 配車成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeDispatchResponse'
+
+  /api/drivers/location:
+    post:
+      tags:
+        - Drivers
+      summary: ドライバー位置更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationUpdate'
+      responses:
+        '200':
+          description: 位置更新成功
+
+  /api/nearby-drivers:
+    get:
+      tags:
+        - Drivers
+      summary: 近くのドライバー検索
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radius
+          in: query
+          schema:
+            type: number
+            default: 5
+      responses:
+        '200':
+          description: ドライバー一覧
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NearbyDriversResponse'
+
+  /api/dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: 統計情報取得
+      responses:
+        '200':
+          description: 統計データ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        environment:
+          type: string
+        version:
+          type: string
+
+    CompanyRegistration:
+      type: object
+      required:
+        - companyName
+        - representativeEmail
+      properties:
+        companyName:
+          type: string
+        companyAddress:
+          type: string
+        companyPhone:
+          type: string
+        licenseNumber:
+          type: string
+        representativeName:
+          type: string
+        representativeEmail:
+          type: string
+          format: email
+        serviceArea:
+          type: string
+        vehicleCount:
+          type: integer
+        driverCount:
+          type: integer
+        selectedPlan:
+          type: string
+          enum: [standard, premium, enterprise]
+
+    DriverRegistration:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+        birthdate:
+          type: string
+          format: date
+        licenseNumber:
+          type: string
+        licenseExpiry:
+          type: string
+          format: date
+        taxiLicenseNumber:
+          type: string
+        hasOwnVehicle:
+          type: boolean
+        isFullTime:
+          type: boolean
+        workingArea:
+          type: string
+        vehicleModel:
+          type: string
+        vehicleYear:
+          type: string
+        vehiclePlate:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+        - userType
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        userType:
+          type: string
+          enum: [company, driver]
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            user:
+              type: object
+            token:
+              type: string
+
+    VoiceDispatchRequest:
+      type: object
+      required:
+        - customerName
+        - customerPhone
+        - pickupLocation
+        - destination
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+        pickupLocation:
+          type: string
+        destination:
+          type: string
+        vehicleType:
+          type: string
+          enum: [standard, premium, wheelchair]
+          default: standard
+        notes:
+          type: string
+
+    VoiceDispatchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            dispatchId:
+              type: string
+            assignedDriver:
+              type: object
+              properties:
+                name:
+                  type: string
+                vehicleModel:
+                  type: string
+                vehiclePlate:
+                  type: string
+            estimatedArrival:
+              type: integer
+            twimlUrl:
+              type: string
+
+    RealtimeDispatchRequest:
+      type: object
+      required:
+        - customerPhone
+        - pickupLocation
+        - destination
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        pickupLocation:
+          type: string
+        destination:
+          type: string
+        pickupLatitude:
+          type: number
+          format: double
+        pickupLongitude:
+          type: number
+          format: double
+        vehicleType:
+          type: string
+        priority:
+          type: string
+          enum: [normal, high, urgent]
+
+    RealtimeDispatchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            dispatchId:
+              type: string
+            assignedDriver:
+              type: object
+            estimatedArrival:
+              type: integer
+            estimatedFare:
+              type: integer
+            processingTime:
+              type: integer
+
+    LocationUpdate:
+      type: object
+      required:
+        - driverId
+        - latitude
+        - longitude
+      properties:
+        driverId:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        status:
+          type: string
+          enum: [active, busy, offline]
+
+    NearbyDriversResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            searchLocation:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+            searchRadius:
+              type: number
+            drivers:
+              type: array
+              items:
+                type: object
+            count:
+              type: integer
+
+    DashboardStats:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            companies:
+              type: integer
+            drivers:
+              type: integer
+            todayDispatches:
+              type: integer
+            activeDrivers:
+              type: integer
+            costReduction:
+              type: number
+            driverSufficiency:
+              type: number
+            profitIncrease:
+              type: number
+            systemUptime:
+              type: number
+
+    RegistrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            companyId:
+              type: string
+            userType:
+              type: string
+
+    VerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+            userType:
+              type: string
+            email:
+              type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: リクエスト不正
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    Unauthorized:
+      description: 認証エラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    NotFound:
+      description: リソース未発見
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    InternalServerError:
+      description: サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobility Ops 360 API Documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .badges {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+        #swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .info {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 2rem;
+            border-radius: 0.5rem;
+        }
+        .info h2 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .quick-links {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem;
+            flex-wrap: wrap;
+        }
+        .quick-link {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: #333;
+            flex: 1;
+            min-width: 200px;
+            transition: all 0.3s;
+        }
+        .quick-link:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .quick-link h3 {
+            margin: 0 0 0.5rem 0;
+            color: #667eea;
+        }
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚖 Mobility Ops 360 API</h1>
+        <p>タクシー業界向けAI配車システムAPIドキュメント</p>
+        <div class="badges">
+            <span class="badge">Version 1.0.0</span>
+            <span class="badge">🎙️ AI音声配車</span>
+            <span class="badge">🚗 リアルタイム配車</span>
+            <span class="badge">📍 GPS追跡</span>
+        </div>
+    </div>
+
+    <div class="info">
+        <h2>🚀 クイックスタート</h2>
+        <p><strong>Base URL:</strong> https://mobility-ops-360-api.yukihamada.workers.dev</p>
+        <p><strong>認証:</strong> Bearer Token (Authorization: Bearer &lt;token&gt;)</p>
+        <p><strong>テスト電話番号:</strong> +1 959-210-5018</p>
+    </div>
+
+    <div class="quick-links">
+        <a href="#/Health/get_health" class="quick-link">
+            <h3>🏥 ヘルスチェック</h3>
+            <p>システムの稼働状況を確認</p>
+        </a>
+        <a href="#/Auth/post_auth_login" class="quick-link">
+            <h3>🔐 認証</h3>
+            <p>ログイン・トークン取得</p>
+        </a>
+        <a href="#/Voice_Dispatch/post_api_voice_dispatch_create" class="quick-link">
+            <h3>🎙️ AI音声配車</h3>
+            <p>自動音声での配車受付</p>
+        </a>
+        <a href="#/Realtime/post_api_realtime_dispatch" class="quick-link">
+            <h3>⚡ リアルタイム配車</h3>
+            <p>最速マッチング</p>
+        </a>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <div class="footer">
+        <p>© 2025 Mobility Ops 360 | <a href="https://github.com/mobility360/api">GitHub</a> | <a href="mailto:support@mobility360.jp">サポート</a></p>
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: "/api/openapi.yaml",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                docExpansion: "list",
+                filter: true,
+                showExtensions: true,
+                showCommonExtensions: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                onComplete: function() {
+                    console.log("Swagger UI loaded");
+                },
+                validatorUrl: null
+            });
+            window.ui = ui;
+        }
+    </script>
+</body>
+</html>

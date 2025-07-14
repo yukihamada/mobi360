@@ -1,0 +1,36 @@
+{
+    "name": "Mobility Ops 360 - タクシー業界DXプラットフォーム",
+    "short_name": "Mobility360", 
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#667EEA",
+    "theme_color": "#667EEA",
+    "description": "AI音声配車・ギグドライバー管理・セキュア運用を統合した次世代タクシー業界DXプラットフォーム",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "categories": ["business", "productivity", "travel"],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

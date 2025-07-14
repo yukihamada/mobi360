@@ -1,0 +1,31 @@
+# Source files
+src/
+examples/
+tests/
+
+# Config files
+tsconfig.json
+.eslintrc.js
+jest.config.js
+
+# Development files
+*.log
+*.tmp
+.DS_Store
+.idea/
+.vscode/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Build tools
+.github/
+.circleci/
+
+# Documentation source
+docs/
+
+# Misc
+*.tgz
+node_modules/

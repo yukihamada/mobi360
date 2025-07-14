@@ -1,0 +1,15 @@
+# Cloudflare Pages用リダイレクト設定
+
+# SPA対応 - すべてのルートをindex.htmlに
+/*    /index.html   200
+
+# API プロキシ設定
+/api/*  https://api.mobility360.jp/:splat  200
+
+# セキュリティリダイレクト
+/admin/*  https://admin.mobility360.jp/:splat  301
+/dashboard/*  https://admin.mobility360.jp/:splat  301
+
+# レガシーパス対応
+/old-app/*  /:splat  301
+/legacy/*   /:splat  301

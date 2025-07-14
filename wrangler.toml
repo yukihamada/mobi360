@@ -1,0 +1,51 @@
+name = "mobi360-worker"
+main = "backend/cloudflare_workers/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.dev]
+route = "dev.mobi360.app/api/*"
+vars = { ENVIRONMENT = "dev" }
+
+[env.stg]
+route = "stg.mobi360.app/api/*"
+vars = { ENVIRONMENT = "stg" }
+
+[env.prod]
+route = "mobi360.app/api/*"
+vars = { ENVIRONMENT = "prod" }
+
+# Database bindings
+[[d1_databases]]
+binding = "D1_MOBI360_DB"
+database_name = "mobi360_db"
+database_id = "your_d1_database_id"
+
+# R2 bucket bindings
+[[r2_buckets]]
+binding = "R2_ASSETS"
+bucket_name = "mobi360-assets"
+
+# Durable Object bindings
+[[durable_objects.bindings]]
+name = "DISPATCH_LOCKER"
+class_name = "DispatchLocker"
+script_name = "mobi360-do-locker"
+
+# Queue bindings
+[[queues.consumers]]
+queue = "dispatch-jobs"
+max_batch_size = 10
+max_wait_time_ms = 30000
+max_retries = 5
+
+# KV bindings
+[[kv_namespaces]]
+binding = "MOBI360_KV"
+id = "your_kv_namespace_id"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "dev"
+APP_VERSION = "1.0.0"
+API_BASE_URL = "https://api.mobi360.app"

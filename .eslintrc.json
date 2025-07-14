@@ -1,0 +1,28 @@
+{
+  "env": {
+    "es2022": true,
+    "node": true,
+    "browser": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-console": "off",
+    "no-unused-vars": "warn",
+    "no-undef": "error"
+  },
+  "globals": {
+    "crypto": "readonly",
+    "WebSocketPair": "readonly",
+    "Request": "readonly",
+    "Response": "readonly",
+    "Headers": "readonly",
+    "URL": "readonly",
+    "fetch": "readonly"
+  }
+}

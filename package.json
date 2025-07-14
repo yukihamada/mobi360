@@ -1,0 +1,61 @@
+{
+  "name": "mobility-ops-360",
+  "version": "1.0.0",
+  "description": "タクシー業界の配車/ギグドライバー管理/セキュリティ/外部連携を統合した次世代DXプラットフォーム",
+  "main": "backend/cloudflare_workers/index.js",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy:dev": "wrangler deploy --env dev",
+    "deploy:stg": "wrangler deploy --env stg",
+    "deploy:prod": "wrangler deploy --env prod",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "db:migrate": "wrangler d1 migrations apply mobi360_db",
+    "db:migrate:dev": "wrangler d1 migrations apply mobi360_db --env dev",
+    "db:migrate:stg": "wrangler d1 migrations apply mobi360_db --env stg",
+    "db:seed": "wrangler d1 execute mobi360_db --file infrastructure/d1_migrations/seed.sql",
+    "build": "npm run type-check && npm run lint && npm run test",
+    "start": "wrangler dev"
+  },
+  "keywords": [
+    "taxi",
+    "dispatch",
+    "mobility",
+    "cloudflare-workers",
+    "ai",
+    "gig-economy",
+    "dx"
+  ],
+  "author": "Mobility Ops 360 Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240129.0",
+    "@hono/node-server": "^1.8.2",
+    "hono": "^4.0.0",
+    "zod": "^3.22.4",
+    "jose": "^5.2.0",
+    "stripe": "^14.17.0",
+    "twilio": "^4.23.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-environment-miniflare": "^2.14.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.25.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

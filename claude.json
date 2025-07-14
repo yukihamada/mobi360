@@ -1,0 +1,141 @@
+{
+  "project": "mobility_ops_360",
+  "version": "1.0.0",
+  "description": "タクシー業界の配車／ギグドライバー管理／セキュリティ／外部連携を統合した次世代DXプラットフォーム",
+
+  "framework": {
+    "frontend": "flutter",
+    "seo_framework": {
+      "name": "nextjs",
+      "ssr": true
+    },
+    "testing_framework": "playwright"
+  },
+
+  "environments": {
+    "dev": { "domain": "dev.mobi360.app" },
+    "stg": { "domain": "stg.mobi360.app" },
+    "prod": { "domain": "mobi360.app" }
+  },
+
+  "infrastructure": {
+    "cloudflare": {
+      "workers": {
+        "enabled": true,
+        "script_name": "mobi360_worker",
+        "region": "global",
+        "routes": ["*.mobi360.app/api/*"],
+        "bindings": ["D1_MOBI360_DB", "R2_ASSETS", "STRIPE_SECRET_KEY", "TWILIO_SECRET_KEY", "SENTRY_DSN"]
+      },
+
+      "durable_objects": {
+        "dispatch_locker": {
+          "class_name": "DispatchLocker",
+          "script_name": "mobi360_do_locker",
+          "migration": "upgrade_dispatch_locker.mjs"
+        }
+      },
+
+      "queues": {
+        "dispatch_jobs": {
+          "description": "AI配車および需要予測ジョブ",
+          "max_retries": 5,
+          "dead_letter": "dispatch_jobs_dlq"
+        }
+      },
+
+      "r2": {
+        "enabled": true,
+        "bucket": "mobi360-assets",
+        "public_domain": "assets.mobi360.app",
+        "free_tier": true
+      },
+
+      "d1": {
+        "enabled": true,
+        "database_name": "mobi360_db",
+        "migrations_dir": "migrations",
+        "region": "global",
+        "bindings": {
+          "dev": "D1_MOBI360_DB_DEV",
+          "stg": "D1_MOBI360_DB_STG",
+          "prod": "D1_MOBI360_DB"
+        }
+      },
+
+      "stream": {
+        "enabled": false
+      },
+
+      "analytics": {
+        "enabled": true
+      }
+    }
+  },
+
+  "claude_code": {
+    "parallel_execution": {
+      "enabled": true,
+      "max_concurrency": 8
+    },
+
+    "tasks": {
+      "ai_voice_dispatch": {
+        "description": "AI音声自動配車処理（Workers＋Durable Objects）",
+        "automation": true
+      },
+      "driver_pool_management": {
+        "description": "ギグドライバーの登録・管理・シフトマッチング",
+        "automation": true
+      },
+      "secure_gatekeeper": {
+        "description": "ゼロトラストIAMとリアルタイム監査ログ管理",
+        "automation": true
+      },
+      "connector_hub": {
+        "description": "外部配車アプリAPI連携の一元化処理",
+        "automation": true
+      },
+      "profit_engine": {
+        "description": "リアルタイム需要予測・動的料金設定処理",
+        "automation": true
+      },
+      "notification_service": {
+        "description": "配車確認・リマインド・決済通知（Slack・Twilio・Email）",
+        "automation": true
+      }
+    },
+
+    "auto_test": {
+      "enabled": true,
+      "framework": "playwright"
+    },
+
+    "seo_optimization": {
+      "enabled": true,
+      "ssr": true,
+      "framework": "nextjs"
+    },
+
+    "analytics": {
+      "enabled": true,
+      "provider": "cloudflare"
+    },
+
+    "deployment": {
+      "auto_deploy": true,
+      "approval_required": {
+        "dev": false,
+        "stg": false,
+        "prod": true
+      },
+      "notification_channel": ["slack"]
+    }
+  },
+
+  "cost_management": {
+    "monthly_budget_usd": 1500,
+    "alert_threshold_percent": [60, 80],
+    "notification_channel": ["slack", "email", "sms"]
+  }
+}

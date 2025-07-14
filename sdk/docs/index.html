@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobility Ops 360 SDK Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        pre[class*="language-"] {
+            margin: 1.5rem 0;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-6 py-12">
+            <h1 class="text-4xl font-bold mb-4">Mobility Ops 360 SDK</h1>
+            <p class="text-xl opacity-90">タクシー業界DXを実現する公式TypeScript SDK</p>
+            <div class="flex gap-4 mt-6">
+                <a href="https://www.npmjs.com/package/@mobi360/sdk" class="bg-white text-purple-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    npm でインストール
+                </a>
+                <a href="https://github.com/mobility360/sdk-typescript" class="bg-purple-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-900 transition">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quick Start -->
+    <section class="container mx-auto px-6 py-12">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-3xl font-bold mb-6">🚀 クイックスタート</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">1. インストール</h3>
+                    <pre><code class="language-bash">npm install @mobi360/sdk</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">2. 基本的な使い方</h3>
+                    <pre><code class="language-typescript">import { Mobi360Client } from '@mobi360/sdk';
+
+// クライアントを初期化
+const client = new Mobi360Client({
+  apiKey: 'your-api-key',
+  debug: true
+});
+
+// ログイン
+await client.auth.login({
+  email: 'demo@example.com',
+  password: 'password123'
+});
+
+// AI音声配車を作成
+const dispatch = await client.voiceDispatch.create({
+  customerName: '田中太郎',
+  customerPhone: '090-1234-5678',
+  pickupLocation: '新宿駅東口',
+  destination: '渋谷駅',
+  vehicleType: 'standard'
+});
+
+console.log(`配車ID: ${dispatch.data.dispatchId}`);</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="container mx-auto px-6 py-12">
+        <h2 class="text-3xl font-bold mb-8 text-center">主な機能</h2>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">🔐</div>
+                <h3 class="text-xl font-semibold mb-2">認証管理</h3>
+                <p class="text-gray-600">JWT認証の自動管理、トークンリフレッシュ、セキュアなAPI通信</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">🎙️</div>
+                <h3 class="text-xl font-semibold mb-2">AI音声配車</h3>
+                <p class="text-gray-600">Twilioと連携したAI音声応答、自動配車マッチング</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">📡</div>
+                <h3 class="text-xl font-semibold mb-2">リアルタイム通信</h3>
+                <p class="text-gray-600">WebSocketによる位置追跡、配車状況のリアルタイム更新</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">📊</div>
+                <h3 class="text-xl font-semibold mb-2">データ分析</h3>
+                <p class="text-gray-600">ダッシュボード統計、メトリクス監視、データエクスポート</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">🌐</div>
+                <h3 class="text-xl font-semibold mb-2">完全な型定義</h3>
+                <p class="text-gray-600">TypeScriptによる型安全性、IntelliSense対応</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover-card transition duration-300">
+                <div class="text-purple-600 text-3xl mb-4">🔄</div>
+                <h3 class="text-xl font-semibold mb-2">自動リトライ</h3>
+                <p class="text-gray-600">ネットワークエラー時の自動リトライ、接続管理</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Reference -->
+    <section class="container mx-auto px-6 py-12">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-3xl font-bold mb-6">📚 APIリファレンス</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">主要なメソッド</h3>
+                    <ul class="space-y-3">
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.auth.login()</code> - ユーザー認証</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.drivers.getNearby()</code> - 近隣ドライバー検索</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.voiceDispatch.create()</code> - AI音声配車作成</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.ws.connect()</code> - WebSocket接続</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.dashboard.stats()</code> - 統計情報取得</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">client.export.drivers()</code> - データエクスポート</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">WebSocketイベント</h3>
+                    <ul class="space-y-3">
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:open</code> - 接続成功</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:message</code> - メッセージ受信</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:dispatch_request</code> - 配車リクエスト</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:location_broadcast</code> - 位置情報更新</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:error</code> - エラー発生</li>
+                        <li><code class="bg-gray-100 px-2 py-1 rounded">ws:close</code> - 接続終了</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Examples -->
+    <section class="container mx-auto px-6 py-12">
+        <h2 class="text-3xl font-bold mb-8 text-center">実装例</h2>
+
+        <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-xl font-semibold mb-4">リアルタイム位置追跡</h3>
+                <pre><code class="language-typescript">// ドライバー専用WebSocket接続
+const ws = client.ws.connect('driver', 'driver_123');
+
+// 位置情報の定期送信
+setInterval(async () => {
+  const location = await getCurrentGPSLocation();
+  
+  await client.drivers.updateLocation('driver_123', location);
+  
+  client.ws.send('driver', {
+    type: 'location_update',
+    location
+  }, 'driver_123');
+}, 5000);
+
+// 配車リクエストの受信
+client.on('ws:dispatch_request', async (data) => {
+  console.log('新しい配車リクエスト:', data);
+  // UIに表示して承認/拒否を選択
+});</code></pre>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-xl font-semibold mb-4">エラーハンドリング</h3>
+                <pre><code class="language-typescript">try {
+  const result = await client.auth.login({
+    email: 'test@example.com',
+    password: 'password'
+  });
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    console.error('APIエラー:', error.response?.data?.message);
+    
+    if (error.response?.status === 401) {
+      // 認証エラーの処理
+    }
+  }
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Links -->
+    <section class="container mx-auto px-6 py-12">
+        <div class="bg-purple-100 rounded-xl p-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">📖 ドキュメント</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <a href="./QUICKSTART.md" class="bg-white rounded-lg p-6 hover-card transition duration-300 text-center">
+                    <div class="text-4xl mb-4">🚀</div>
+                    <h3 class="text-xl font-semibold">クイックスタート</h3>
+                    <p class="text-gray-600 mt-2">5分で始める</p>
+                </a>
+
+                <a href="./API.md" class="bg-white rounded-lg p-6 hover-card transition duration-300 text-center">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-xl font-semibold">APIリファレンス</h3>
+                    <p class="text-gray-600 mt-2">完全なAPI仕様</p>
+                </a>
+
+                <a href="./WEBSOCKET.md" class="bg-white rounded-lg p-6 hover-card transition duration-300 text-center">
+                    <div class="text-4xl mb-4">📡</div>
+                    <h3 class="text-xl font-semibold">WebSocketガイド</h3>
+                    <p class="text-gray-600 mt-2">リアルタイム通信</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support -->
+    <section class="container mx-auto px-6 py-12 mb-12">
+        <div class="bg-gray-800 text-white rounded-xl p-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">サポート</h2>
+            <p class="text-xl mb-6">ご質問やお困りのことがありましたら、お気軽にお問い合わせください</p>
+            
+            <div class="flex justify-center gap-6">
+                <a href="https://github.com/mobility360/sdk-typescript/issues" class="bg-gray-700 px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                    GitHub Issues
+                </a>
+                <a href="mailto:support@mobility360.jp" class="bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 transition">
+                    メールで問い合わせ
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

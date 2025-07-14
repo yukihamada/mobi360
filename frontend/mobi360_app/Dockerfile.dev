@@ -1,0 +1,32 @@
+# Flutter開発用Dockerfile
+
+FROM ghcr.io/cirruslabs/flutter:3.16.0
+
+WORKDIR /app
+
+# システム依存関係
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    libglu1-mesa \
+    && rm -rf /var/lib/apt/lists/*
+
+# Flutter Web設定
+RUN flutter config --enable-web
+RUN flutter doctor
+
+# pubspec.yamlをコピーして依存関係を解決
+COPY pubspec.* ./
+RUN flutter pub get
+
+# アプリケーションコードをコピー
+COPY . .
+
+# ポート公開
+EXPOSE 8080
+
+# 開発サーバー起動
+CMD ["flutter", "run", "-d", "web-server", "--web-port", "8080", "--web-hostname", "0.0.0.0"]

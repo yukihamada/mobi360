@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Mobility Ops 360 - タクシー業界のDXを革新するプラットフォーム">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Mobility Ops 360">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Mobility Ops 360 - タクシー業界DXプラットフォーム</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Loading screen -->
+  <style>
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .loading-content {
+      text-align: center;
+    }
+    .loading-icon {
+      font-size: 80px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .loading-text {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading screen while Flutter loads -->
+  <div class="loading" id="loading">
+    <div class="loading-content">
+      <div class="loading-icon">🚖</div>
+      <div class="loading-text">Mobility Ops 360</div>
+    </div>
+  </div>
+
+  <script>
+    // Remove loading screen when Flutter is ready
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+            // Remove loading after Flutter starts
+            var loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+              setTimeout(function() {
+                loadingElement.remove();
+              }, 100);
+            }
+          });
+        }
+      });
+    });
+  </script>
+
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
