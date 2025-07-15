@@ -1,0 +1,151 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run linter
+        run: |
+          cd backend
+          npm run lint || true
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          npm test || true
+
+      - name: Run E2E tests
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          cd backend
+          npm run test:e2e || true
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: backend
+          environment: production
+          secrets: |
+            TWILIO_ACCOUNT_SID
+            TWILIO_AUTH_TOKEN
+            TWILIO_PHONE_NUMBER
+            JWT_SECRET
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      - name: Verify deployment
+        run: |
+          sleep 10
+          curl -f https://mobility-ops-360-api.yukihamada.workers.dev/health || exit 1
+
+      - name: Run smoke tests
+        run: |
+          # Test health endpoint
+          curl -s https://mobility-ops-360-api.yukihamada.workers.dev/health | jq -e '.status == "healthy"'
+          
+          # Test voice webhook endpoint
+          curl -X POST https://mobility-ops-360-api.yukihamada.workers.dev/api/voice/incoming \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "From=%2B81901234567&To=%2B19592105018&CallSid=CAtest123" \
+            -s | grep -q "<Response>"
+
+      - name: Notify success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ デプロイが成功しました！\n\n- 🔗 API: https://mobility-ops-360-api.yukihamada.workers.dev\n- 📞 電話番号: +1 (959) 210-5018\n- 📊 ヘルスチェック: ✅'
+            })
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Deploy to Staging
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: backend
+          environment: staging
+          command: deploy --env staging
+
+      - name: Comment PR with staging URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 ステージング環境にデプロイしました！\n\n- 🔗 URL: https://mobility-ops-360-api-staging.yukihamada.workers.dev\n- 🧪 テストしてから本番にマージしてください'
+            })

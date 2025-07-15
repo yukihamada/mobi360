@@ -304,7 +304,7 @@ git push origin feature/amazing-feature
 
 ### お問い合わせ先
 
-- 📞 **AI音声配車デモ**: +1 (959) 210-5018（米国番号・英語対応）
+- 📞 **AI音声配車デモ**: +1 (959) 210-5018（米国番号・日本語対応）
 - 📧 **Email**: support@mobility360.jp
 - 💬 **Slack**: [#mobility360コミュニティ](https://mobility360.slack.com)
 - 🐛 **バグ報告**: [GitHub Issues](https://github.com/yukihamada/mobi360/issues)

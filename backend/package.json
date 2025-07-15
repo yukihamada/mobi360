@@ -8,13 +8,18 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "deploy:production": "wrangler deploy --env production",
+    "deploy:staging": "wrangler deploy --env staging",
     "db:migrate": "wrangler d1 execute mobi360-development-db --file=./migrations/001_initial_schema.sql",
     "db:migrate:production": "wrangler d1 execute mobi360-production-db --file=./migrations/001_initial_schema.sql",
     "db:seed": "wrangler d1 execute mobi360-development-db --file=./migrations/seed_data.sql",
     "logs": "wrangler tail",
+    "logs:production": "wrangler tail --env production",
     "test": "vitest",
+    "test:e2e": "cd tests && jest e2e --runInBand",
+    "test:api": "cd tests && jest api --runInBand",
     "lint": "eslint src/",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/"
   },
   "dependencies": {
     "hono": "^3.12.0",
