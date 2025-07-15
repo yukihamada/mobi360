@@ -2879,7 +2879,7 @@ app.post('/api/voice/incoming', async (c) => {
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say language="ja-JP">お電話ありがとうございます。デモタクシー株式会社のAI配車システムです。現在3台の車両が利用可能です。</Say>
-  <Gather input="speech" language="ja-JP" timeout="10" action="https://mobility-ops-360-api.yukihamada.workers.dev/api/voice/process-speech">
+  <Gather input="speech" language="ja-JP" timeout="10" action="/api/voice/process-speech">
     <Say language="ja-JP">配車をご希望の場合は、お迎え場所を教えてください。</Say>
   </Gather>
   <Say language="ja-JP">お返事が聞こえませんでした。失礼いたします。</Say>
