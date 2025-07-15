@@ -24,9 +24,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Check code formatting
         run: |
@@ -64,9 +63,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd sdk
-          npm ci
+        working-directory: sdk
+        run: npm ci
 
       - name: Build SDK
         run: |
@@ -104,9 +102,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Run API tests
         env:

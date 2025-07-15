@@ -25,9 +25,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Run linter
         run: |
@@ -62,9 +61,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
@@ -127,9 +125,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          npm ci
+        working-directory: backend
+        run: npm ci
 
       - name: Deploy to Staging
         uses: cloudflare/wrangler-action@v3
