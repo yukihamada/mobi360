@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobility Ops 360 - 登録テスト</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667EEA;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        button {
+            background: #667EEA;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚖 Mobility Ops 360</h1>
+        <h2>アプリ機能テスト</h2>
+
+        <div class="test-section">
+            <h3>1. AI音声配車テスト</h3>
+            <button onclick="testVoiceDispatch()">配車リクエスト作成</button>
+            <div id="voiceResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 電話機能テスト</h3>
+            <p>📞 +1 (959) 210-5018 に電話してテスト</p>
+            <button onclick="testTwilioWebhook()">Webhook動作確認</button>
+            <div id="twilioResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. データベース初期化</h3>
+            <button onclick="initDatabase(false)">DBテーブル作成</button>
+            <button onclick="initDatabase(true)" style="background: #dc3545;">完全リセット</button>
+            <div id="dbResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. APIヘルスチェック</h3>
+            <button onclick="checkHealth()">システム状態確認</button>
+            <div id="healthResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://mobility-ops-360-api.yukihamada.workers.dev';
+
+        async function testVoiceDispatch() {
+            const result = document.getElementById('voiceResult');
+            result.textContent = '処理中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/voice-dispatch/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerName: 'テスト太郎',
+                        customerPhone: '+81901234567',
+                        pickupLocation: '東京駅',
+                        destination: '渋谷駅',
+                        vehicleType: 'standard'
+                    })
+                });
+                
+                const data = await response.json();
+                result.className = response.ok ? 'result success' : 'result error';
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'エラー: ' + error.message;
+            }
+        }
+
+        async function testTwilioWebhook() {
+            const result = document.getElementById('twilioResult');
+            result.textContent = '処理中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/voice/incoming`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'From=%2B81901234567&To=%2B19592105018&CallSid=CAtest123'
+                });
+                
+                const data = await response.text();
+                result.className = 'result success';
+                result.textContent = data;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'エラー: ' + error.message;
+            }
+        }
+
+        async function initDatabase(force = false) {
+            const result = document.getElementById('dbResult');
+            result.textContent = force ? '完全リセット中...' : '処理中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/init-database`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ force: force })
+                });
+                
+                const data = await response.json();
+                result.className = response.ok ? 'result success' : 'result error';
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'エラー: ' + error.message;
+            }
+        }
+
+        async function checkHealth() {
+            const result = document.getElementById('healthResult');
+            result.textContent = '処理中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                result.className = 'result success';
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'エラー: ' + error.message;
+            }
+        }
+
+        // ページ読み込み時にヘルスチェック
+        window.onload = () => checkHealth();
+    </script>
+</body>
+</html>

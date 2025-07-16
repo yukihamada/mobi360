@@ -92,8 +92,8 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const OnboardingScreen(),
         // ルート設定
+        initialRoute: '/',
         routes: {
           '/': (context) => const OnboardingScreen(),
           '/dashboard': (context) => const DashboardScreen(),

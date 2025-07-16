@@ -8,10 +8,11 @@ const app = new Hono();
 
 // CORS設定
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://mobi360.app'],
+  origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
+  maxAge: 86400,
 }));
 
 // 静的ファイルの提供
@@ -2622,6 +2623,22 @@ app.post('/api/init-database', async (c) => {
       }, 500);
     }
 
+    // リクエストボディから強制フラグを取得
+    const body = await c.req.json().catch(() => ({}));
+    const force = body.force === true;
+
+    if (force) {
+      // 既存テーブルを削除
+      try {
+        await c.env.DB.prepare('DROP TABLE IF EXISTS dispatch_requests').run();
+        await c.env.DB.prepare('DROP TABLE IF EXISTS drivers').run();
+        await c.env.DB.prepare('DROP TABLE IF EXISTS companies').run();
+        console.log('Existing tables dropped successfully');
+      } catch (dropError) {
+        console.error('Error dropping tables:', dropError);
+      }
+    }
+
     // テーブル作成
     await c.env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS companies (
@@ -2648,7 +2665,7 @@ app.post('/api/init-database', async (c) => {
         company_id TEXT,
         name TEXT NOT NULL,
         phone TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL,
         address TEXT NOT NULL,
         birthdate TEXT NOT NULL,
         license_number TEXT,
@@ -2747,10 +2764,11 @@ app.post('/api/init-database', async (c) => {
 
     return c.json({
       success: true,
-      message: 'データベースの初期化が完了しました',
+      message: force ? 'データベースを完全に再作成しました' : 'データベースの初期化が完了しました',
       data: {
         tables: ['companies', 'drivers', 'dispatch_requests'],
-        demoDrivers: drivers.length
+        demoDrivers: drivers.length,
+        force: force
       }
     });
   } catch (error) {
@@ -2758,7 +2776,8 @@ app.post('/api/init-database', async (c) => {
     return c.json({
       success: false,
       error: 'Database Initialization Failed',
-      message: error.message
+      message: error.message,
+      details: error.stack
     }, 500);
   }
 });
