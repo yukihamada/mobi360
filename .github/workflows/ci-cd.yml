@@ -100,7 +100,7 @@ jobs:
         flutter build web --release --dart-define=API_BASE_URL=https://api.mobility360.jp
         
     - name: 📦 Archive Build Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: build-artifacts
         path: |
